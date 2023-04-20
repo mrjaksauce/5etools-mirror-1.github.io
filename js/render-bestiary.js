@@ -35,6 +35,11 @@ class RenderBestiary {
 		const hasToken = mon.tokenUrl || mon.hasToken;
 		const extraThClasses = hasToken ? ["mon__name--token"] : null;
 
+		const ptsResource = mon.resource?.length
+			? mon.resource
+				.map(res => `<tr><td colspan="6"><div ${hasToken ? `class="mon__wrp-avoid-token"` : ""}><strong>${res.name}</strong> ${Renderer.monster.getRenderedResource(res)}</div></td></tr>`)
+			: [];
+
 		return $$`
 		${Renderer.utils.getBorderTr()}
 		${!options.isSkipExcludesRender ? Renderer.utils.getExcludedTr({entity: mon, dataProp: "monster", page: UrlUtil.PG_BESTIARY}) : null}
@@ -46,15 +51,11 @@ class RenderBestiary {
 
 		<tr><td colspan="6"><div ${hasToken ? `class="mon__wrp-avoid-token"` : ""}><strong>Armor Class</strong> ${Parser.acToFull(mon.ac)}</div></td></tr>
 		<tr><td colspan="6"><div ${hasToken ? `class="mon__wrp-avoid-token"` : ""}><strong>Hit Points</strong> ${Renderer.monster.getRenderedHp(mon.hp)}</div></td></tr>
+		${ptsResource.join("")}
 		<tr><td colspan="6"><strong>Speed</strong> ${Parser.getSpeedString(mon)}</td></tr>
 		<tr><td class="divider" colspan="6"><div></div></td></tr>
 
-		<tr class="mon__ability-names">
-			<th>STR</th><th>DEX</th><th>CON</th><th>INT</th><th>WIS</th><th>CHA</th>
-		</tr>
-		<tr class="mon__ability-scores">
-			${Parser.ABIL_ABVS.map(ab => `<td>${Renderer.utils.getAbilityRoller(mon, ab)}</td>`).join("")}
-		</tr>
+		${Renderer.monster.getRenderedAbilityScores(mon)}
 		<tr><td class="divider" colspan="6"><div></div></td></tr>
 
 		${mon.save ? `<tr><td colspan="6"><strong>Saving Throws</strong> ${Renderer.monster.getSavesPart(mon)}</td></tr>` : ""}
@@ -103,8 +104,8 @@ class RenderBestiary {
 	}
 
 	static _getRenderedSectionHeader ({mon, title, prop}) {
-		const noteKey = `${prop}Note`;
-		return `<tr><td colspan="6" class="mon__stat-header-underline"><h3 class="mon__sect-header-inner">${title}${mon[noteKey] ? ` (<span class="small">${mon[noteKey]}</span>)` : ""}</h3></td></tr>`;
+		const propNote = `${prop}Note`;
+		return `<tr><td colspan="6" class="mon__stat-header-underline"><h3 class="mon__sect-header-inner">${title}${mon[propNote] ? ` (<span class="small">${mon[propNote]}</span>)` : ""}</h3></td></tr>`;
 	}
 
 	static _getRenderedSection ({mon = null, prop, entries, depth = 1, fnGetHeader = null}) {
